@@ -1,0 +1,37 @@
+==========================================================================
+ Table One
+==========================================================================
+*Test of basic 
+SELECT * FROM S;
+SELECT * FROM S; SELECT * FROM R;
+SELECT S.sid FROM S;
+SELECT S.sid, S.sname FROM S;
+SELECT S.sid, S.sname FROM S WHERE S.sid = 22;
+SELECT S.sid, S.sname FROM S WHERE S.age > 18;
+SELECT S.sid, S.sname FROM S WHERE S.sname == 'Bob';
+SELECT S.sid, S.sname FROM S, R WHERE S.sid = R.sid;
+SELECT S.sid, S.sname FROM S, R WHERE S.sid = R.sid AND S.age > 18;
+
+*Test of order by 
+select * from S order by S.age;
+select * from S order by S.rating;
+select * from S where S.rating < 5 order by S.age;
+select * from S where S.rating > 4 and S.age > 34;
+select S.sid, S.rating, S.age from S where S.rating > 4 and S.age > 34 order by S.rating;
+select * from S where S.rating > 4 and S.age > 34 order by S.rating;
+select R.sid, R.bid from R order by R.bid;
+select * from B order by B.bname;
+
+==========================================================================
+ Table Two
+==========================================================================
+select * from S, R;
+select * from R, B;
+select S.sid, R.bid from S, R;
+select B.color, R.bid from B, R;
+SELECT S.sname, S.sid, R.bid FROM S, R
+select B.color, R.bid from B, R where R.bid > 102;
+select S.sname, S.sid, R.bid FROM S, R where S.age > 40;
+
+Buffer size = 4       -> 8
+Record per Page = 2   -> 4   //operate well

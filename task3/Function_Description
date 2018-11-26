@@ -1,0 +1,31 @@
+
+External Sort <= ordered by "  " 
+{
+	CheckSort(int B, int RecordPerPage){
+		Write_InitialPass(table[0], RecordperPage){
+			for( # 0pass iteration ){
+				WriteRunsPassZero(T,i,RecordPerPage){
+					for (int i=0; i< RecordPerPage; i++) { 
+						SortData(T, passN = 0 , runN, RecordPerPage);
+        					oo.writeObject(TablesMap.get(T).Recs.get(RecordPerPage*runN + i));
+        				} 
+				}
+
+			}
+		}
+		for( # passess ){
+			SortPassess(table[0],B=4, passN, RecordPerpage){
+				for( # runs ){
+					*SortRuns(table[0],B,passN, runN, RecordPerPage){
+						
+					}
+						
+				}
+			}
+		}
+		
+	swyootask.sortedfilepath = swyootask.subpath_write.concat(Tname.get(0)).concat("_"+TotalPasses+"_0.txt");
+	}
+	UpdateInfo()
+}
+

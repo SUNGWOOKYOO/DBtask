@@ -1,0 +1,289 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */options{  static = true;}PARSER_BEGIN(swyootask)
+import java.util.*;
+import java.io.*;
+import java.util.Collections;
+import schema.Table;
+
+public class swyootask{
+  // store from < WORD > using list
+  public static ArrayList<String> Tname = new ArrayList<String>();
+  public static ArrayList<String> STname = new ArrayList<String>();
+  public static ArrayList<String> WTname = new ArrayList<String>();
+  // store col < DOT > c = < WORD >
+  public static ArrayList<String> Scol = new ArrayList<String>();
+  public static ArrayList<String> Wcol = new ArrayList<String>();
+  // store operator and condition
+  public static ArrayList<String> Op = new ArrayList<String>();
+  public static ArrayList<String> ConN = new ArrayList<String>();
+  // store additional info
+  public static boolean All = false;
+  
+  // path position
+  public static String subpath = "/home/swyoo/FileRead/HwData/";
+  public static String path = null;
+  // read .txt file
+  public static String file_txt = new String();
+  // table framework
+  public static HashMap<String, Table> TablesMap = new HashMap<String, Table>();
+  //public static Table tb = new Table();
+
+  public static void ReadFile(String T) {
+    //System.out.println("======================================== read data ====================================== from " + T + ".txt ");
+  	// ================================== step1 : path setting   ===================================================
+	file_txt = T;
+	swyootask.path = swyootask.subpath.concat(file_txt).concat(".txt");
+	//debug for step 1
+	//System.out.println(" path setting : " + swyootask.path);
+	
+	// =================================== step2 : read data stream from TablesMap.get(T)  ===========================
+  	TablesMap.put(T,new Table());
+  	//System.out.println(TablesMap);
+  	//System.out.println( T + ".txt = > Table object :  " + TablesMap.get(T));
+	String str;
+	BufferedReader f = null;	
+	try  {
+		f = new BufferedReader(new FileReader(path));
+		// step 2-1 :making a framework of a table
+		str = f.readLine();
+		String Aarr[] = str.split(" ");
+		for(int i = 0; i<Aarr.length; i++) {
+			String []attr_type = Aarr[i].split("[\\(||\\)]");
+			TablesMap.get(T).CatalogInfo.Attr_TypePairs.put(attr_type[0],attr_type[1]);
+			TablesMap.get(T).CatalogInfo.Attrs.add(attr_type[0]);
+		}
+		// Debug
+		//System.out.println(TablesMap.get(T).CatalogInfo.Attr_TypePairs);
+		//System.out.println(TablesMap.get(T).Recs);
+		// ================================= step 2-2 : store records from a table ==========================================
+		int it = 0;
+		// Catalog;
+		// for each record 
+		while(Boolean.TRUE) {
+			str = f.readLine();
+			if(str == null) break;
+			String []values = str.split(" ");
+			TablesMap.get(T).push_record();
+			// Attributes_Value pairs push 
+			for(int j=0 ; j< TablesMap.get(T).CatalogInfo.Attr_TypePairs.size() ;j++) {
+				TablesMap.get(T).Recs.get(it).push_AttrValPairs(TablesMap.get(T).CatalogInfo.Attrs.get(j),values[j]);
+			}
+			// Debug
+			//System.out.println(TablesMap.get(T).Recs.get(it).Attr_ValPairs.keySet());
+			//System.out.println(TablesMap.get(T).Recs.get(it).Attr_ValPairs.values());
+			it ++;
+		}
+		f.close();
+	}catch (IOException e) {
+	System.out.println("I/O error ! ");
+	}	 	
+
+  	//System.out.println("======================================== load end =======================================");
+  }
+
+  public static void Print() {
+    System.out.println(" ========================================= print =========================================== " );
+	// Debug read file
+	if( All == true ) {
+		for (String T: Tname) {
+			for (String Ac : TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+				System.out.print(Ac+ "		");
+			}
+			System.out.println();
+			// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				for(String Ac: TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+					if (TablesMap.get(T).CatalogInfo.Attrs.contains(Ac)) { 
+						System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Ac)+  "		");
+					}
+					else {
+				  		System.out.print("NULL "+   "		" );
+					}
+				}
+				System.out.println();
+			 }
+		 }
+	 }
+	 else {
+		for (String T: STname) {
+			for (String Sc : Scol) {
+				System.out.print(Sc+ "		");
+			}
+		 	System.out.println();
+		 	// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				for(String Sc: Scol) {
+					if (TablesMap.get(T).CatalogInfo.Attrs.contains(Sc)) { 
+						System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Sc) + "		");
+					 }
+					else {
+				  	System.out.print("NULL" +"		");
+					}
+				 }
+				 System.out.println();
+			 }
+		 }
+	 }
+    System.out.println(" =========================================print end ======================================= " ); 
+  }
+
+	public static void CheckSort() {
+		System.out.println("____________________________CheckSort_________________________________");
+		//Debug
+		//Collections.swap(TablesMap.get("S").Recs, 0, 4);
+		System.out.println("____________________________CheckSort End______________________________");
+	}
+    public static void main(String args []) throws ParseException  {    swyootask parser = new swyootask(System.in);
+        while (true)    {      System.out.println("Reading from standard input...");
+      //swyootask.STname.add("*");
+      //swyootask.Tname.add("*");
+      try      {        switch (swyootask.one_line())        {          case 0 :
+			// Debug test
+			System.out.println("Tname : "+  Tname);
+			System.out.println("Selected col : "+  Scol);
+			System.out.println("Where col : "+  Wcol);
+			System.out.println("Operator : "+  Op);
+			System.out.println("Comp Num : "+  ConN);
+
+			// Debug additional info
+			System.out.println("All flag : "+  All);
+
+			// ============================================= read file =========================================
+			for (String T: Tname) {
+			  ReadFile(T);
+			}
+
+			CheckSort();
+
+			// ============================================== print ============================================ 
+			Print();
+                    System.out.println("OK.");
+          // Deallocate global list 
+          swyootask.STname.clear();
+          swyootask.Tname.clear();
+          swyootask.WTname.clear();
+          swyootask.Scol.clear();
+          swyootask.Wcol.clear();
+          swyootask.Op.clear();
+          swyootask.ConN.clear();
+		   // Deallocate schema info
+		   swyootask.All = false;
+		   swyootask.TablesMap.clear();
+
+		             break;          case 1 :           System.out.println("Goodbye.");
+          System.exit(0);          break;          default :
+          System.out.println("E: unexpected input! ");          break;        }      }      catch (Exception e)      {        System.out.println("NOK.");        System.out.println(e.getMessage());        swyootask.ReInit(System.in);      }      catch (Error e)      {        System.out.println("Oops.");        System.out.println(e.getMessage());        break;      }    }  }}PARSER_END(swyootask)SKIP :{  " "| "\r"| "\t"| "\n"}TOKEN [IGNORE_CASE]: /* OPERATORS */{  < PLUS : "+" >| < MINUS : "-" >| < DIVIDE : "/" >
+| < SELECT : "select" < SPACE > >
+| < FROM : "from" < SPACE > >
+| < WHERE : "where" < SPACE > >
+| < AND : < SPACE > "and" < SPACE > >
+| < OR : < SPACE > "or" < SPACE > >
+| < #SPACE : ([" ","\t","\r","\n"])+ >}TOKEN :{  < CONSTANT : < DIGIT > (< DIGIT >)* >| < #DIGIT : [ "0"-"9" ] >
+| < ALL :  "*" >
+| < COMMA : "," >
+| < DOT  : "." >
+| < COMP : < SPACE > ">" | "=" | "<" | "==" < SPACE > >
+| < WORD : < CHAR > (< CHAR >)*>
+| < CHAR : [ "a"-"z", "A"-"Z" ] >
+}int one_line() :{}{    query() ";"
+  {
+	return 0;
+  }
+  | ";"
+  {
+    return 1;
+  }}
+// sum query definition
+void query() :
+{
+}
+{
+  select_query() { }
+}
+
+void select_query(): {}{ < SELECT > select_list() table_expr() }
+void select_list(): {Token all = null ;}
+{
+   all = < ALL >
+   { 
+     if ( all.toString().equals("*") ) {
+	  		swyootask.All = true;
+	  	}
+   }
+   | selected_col() (< COMMA > selected_col())*
+   
+}
+void selected_col(): { Token t; Token c = null;}
+{
+   t = < WORD > (< DOT > c = < WORD >)?
+	{
+	  	if ( !swyootask.STname.contains(t.toString()) ) {
+	  		swyootask.STname.add(t.toString());
+	  	}
+	  	if ( !swyootask.Scol.contains(c.toString()) ) {
+	  		swyootask.Scol.add(c.toString());
+	  	}
+  	}
+}
+void table_expr(): { } {from_clause() (where_clause())? }
+void from_clause(): { }
+{
+< FROM > table_list()
+	{	
+		for (int i=0 ; i< swyootask.STname.size(); i++) {
+       	if ( swyootask.Tname.contains(swyootask.STname.get(i)) ) {
+  				 //System.out.println("select table is accorded with Tname at from");
+  			}
+  			else {
+  				System.out.println("E: STname set is not a subset of Tname ");
+  				System.exit(0);
+  			}	
+		}
+	}
+}
+void table_list():{ }{ table() ( < COMMA > table() )* } 
+void table(): { Token t; }
+{
+   t = < WORD>
+   {
+     if ( !swyootask.Tname.contains(t.toString()) ) {
+	  		swyootask.Tname.add(t.toString());
+	  	}
+	}
+}
+void where_clause(): { } { < WHERE> bool_expr() ( ( < AND > | < OR> ) bool_expr() )? where_listcheck() }
+void where_listcheck(): { }
+{
+	{
+  		//System.out.println("Tname: " + swyootask.Tname);
+     	//System.out.println("WTname: " + swyootask.WTname);
+     	for (int i=0 ; i< swyootask.WTname.size(); i++) {
+       	if ( swyootask.Tname.contains(swyootask.WTname.get(i)) ) {
+  			}
+  			else {
+  				System.out.println("E: WTname set is not a subset of Tname ");
+  				System.exit(0);
+  			}	
+		}
+	}
+}
+void bool_expr(): { } { bool_test() }
+void bool_test(): { } {operand_attribute() comp_op() ( operand_number() | operand_attribute() ) }
+void operand_attribute(): { Token t; Token c = null;}
+{
+	t = < WORD > (< DOT > c = < WORD >)?
+	{
+		if ( !swyootask.WTname.contains(t.toString()) ) {
+	  		swyootask.WTname.add(t.toString());
+	  	}
+	  	if ( !swyootask.Wcol.contains(c.toString()) ) {
+	  		swyootask.Wcol.add(c.toString());
+	  	}
+	}
+}
+void comp_op(): { Token o = null;} { o = < COMP > {swyootask.Op.add(o.toString()); }}
+void operand_number(): { Token n = null;} { n = < CONSTANT> {swyootask.ConN.add(n.toString()); }}
+
+
+

@@ -1,0 +1,1055 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+options
+{
+  static = true;
+}
+
+PARSER_BEGIN(swyootask)
+
+import java.util.*;
+import java.io.*;
+import schema.*;
+
+public class swyootask
+{
+  // store from < WORD > using list
+  public static ArrayList<String> Tname = new ArrayList<String>();
+  public static ArrayList<String> STname = new ArrayList<String>();
+  public static ArrayList<String> WTname = new ArrayList<String>();
+  // store col < DOT > c = < WORD >
+  public static ArrayList<String> Scol = new ArrayList<String>();
+  public static ArrayList<String> Wcol = new ArrayList<String>();
+  // store operator and condition
+  public static ArrayList<String> Op = new ArrayList<String>();
+  public static ArrayList<String> ConN = new ArrayList<String>();
+  public static ArrayList<String> ConS = new ArrayList<String>();
+  // store Where COND
+  public static HashMap<String, ArrayList<String>> WDic = new HashMap<String, ArrayList<String>>();
+  public static Stack<String> st = new Stack<String>();
+  // store additional info
+  public static boolean All = false;
+  public static boolean wf = true;
+  public static boolean WN = false;
+  public static boolean WS = false;
+  public static boolean WAND = false;
+  public static boolean SortSf = false;
+
+  public static String ODC = new String("NIL");
+  
+  
+  // path position
+  public static String subpath = "/home/swyoo/FileRead/DB/hw2_data/";
+  public static String subpath_write = "/home/swyoo/FileWrite/DB/hw2_data/";
+  public static String sortedfilepath = null;
+  public static String path = null;
+  public static String path_write = null;
+  
+  // read .txt file
+  public static String file_txt = new String();
+  // table framework
+  public static HashMap<String, Table> TablesMap = new HashMap<String, Table>();
+
+// ============================================================================================================================================================
+// *******************************************  Loading Data from table  *****************************************************
+// ============================================================================================================================================================
+  public static void ReadFile(String T) {
+    //System.out.println("======================================== read data ====================================== from " + T + ".txt ");
+  	// ================================== step1 : path setting   ===================================================
+	file_txt = T;
+	swyootask.path = swyootask.subpath.concat(file_txt).concat(".txt");
+	//debug for step 1
+	//System.out.println(" path setting : " + swyootask.path);
+	
+	// =================================== step2 : read data stream from TablesMap.get(T)  ===========================
+  	TablesMap.put(T,new Table());
+  	//System.out.println(TablesMap);
+  	//System.out.println( T + ".txt = > Table object :  " + TablesMap.get(T));
+	String str;
+	BufferedReader f = null;	
+	try  {
+		f = new BufferedReader(new FileReader(path));
+		// step 2-1 :making a framework of a table
+		str = f.readLine();
+		String Aarr[] = str.split(" ");
+		for(int i = 0; i<Aarr.length; i++) {
+			String []attr_type = Aarr[i].split("[\\(||\\)]");
+			TablesMap.get(T).CatalogInfo.Attr_TypePairs.put(attr_type[0],attr_type[1]);
+			TablesMap.get(T).CatalogInfo.Attrs.add(attr_type[0]);
+		}
+		// Debug
+		//System.out.println(TablesMap.get(T).CatalogInfo.Attr_TypePairs);
+		//System.out.println(TablesMap.get(T).Recs);
+		// ================================= step 2-2 : store records from a table ==========================================
+		int it = 0;
+		// Catalog;
+		// for each record 
+		while(Boolean.TRUE) {
+			str = f.readLine();
+			if(str == null) break;
+			String []values = str.split(" ");
+			TablesMap.get(T).push_record();
+			// Attributes_Value pairs push 
+			for(int j=0 ; j< TablesMap.get(T).CatalogInfo.Attr_TypePairs.size() ;j++) {
+				TablesMap.get(T).Recs.get(it).push_AttrValPairs(TablesMap.get(T).CatalogInfo.Attrs.get(j),values[j]);
+			}
+			// Debug
+			//System.out.println(TablesMap.get(T).Recs.get(it).Attr_ValPairs.keySet());
+			//System.out.println(TablesMap.get(T).Recs.get(it).Attr_ValPairs.values());
+			it ++;
+		}
+		f.close();
+	}catch (IOException e) {
+	System.out.println("I/O error ! ");
+	}	 	
+
+  	//System.out.println("======================================== load end =======================================");
+  }
+
+// ============================================================================================================================================================
+// *******************************************  Print Data after conducting some steps  ************************************
+// ============================================================================================================================================================
+  public static void Print() {
+	// Debug read file
+	if( All == true ) {
+		for (String T: Tname) {
+			for (String Ac : TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+				System.out.print(Ac+ "		");
+			}
+			System.out.println();
+			// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				for(String Ac: TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+					if (TablesMap.get(T).CatalogInfo.Attrs.contains(Ac)) { 
+						System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Ac)+  "		");
+					}
+					else {
+				  		System.out.print("NULL "+   "		" );
+					}
+				}
+				System.out.println();
+			 }
+		 }
+	 }
+	 else {
+		for (String T: STname) {
+			for (String Sc : Scol) {
+				System.out.print(Sc+ "		");
+			}
+		 	System.out.println();
+		 	// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				for(String Sc: Scol) {
+					if (TablesMap.get(T).CatalogInfo.Attrs.contains(Sc)) { 
+						System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Sc) + "		");
+					 }
+					else {
+				  	System.out.print("NULL" +"		");
+					}
+				 }
+				 System.out.println();
+			 }
+		 }
+	 }
+  }
+  public static boolean compN(String op1, String cp, String op2) {
+		if(cp.equals("<")) {
+			if(Double.parseDouble(op1) < Double.parseDouble(op2)) return true;
+			else return false;
+		}
+		else if(cp.equals(">")) {
+			if(Double.parseDouble(op1) > Double.parseDouble(op2)) return true;
+			else return false;
+		}
+		else if(cp.equals("=")) {
+			if(Double.parseDouble(op1) == Double.parseDouble(op2)) return true;
+			else return false;
+		}
+		else {
+			System.out.println("Error ");
+			return false;
+		}
+	}
+	
+	public static boolean compS(String op1, String cp, String op2) {
+		if(cp.equals("==")) {
+			if(op1.equals(op2)) return true;
+			else return false;
+		}
+		else {
+		  	System.out.println("Error ");
+			return false;
+		}
+	}
+	 	
+  public static void PrintWhereN() {
+    if( All == true ) {
+		for (String T: Tname) {
+			for (String Ac : TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+				System.out.print(Ac+ "		");
+			}
+			System.out.println();
+			// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				Set set = WDic.keySet();
+				Iterator iterator = set.iterator();  
+				String SelectedWhereCol = (String)iterator.next();
+				String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+				String b = WDic.get(SelectedWhereCol).get(0);
+				String c = WDic.get(SelectedWhereCol).get(1);
+				if(WN == true) { 
+				if(compN(a,b,c)) {   
+					for (String Ac: TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Ac)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Ac) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+				}
+		 }
+	 }
+	}
+	else { 
+    
+	for (String T: STname) {
+			for (String Sc : Scol) {
+				System.out.print(Sc+ "		");
+			}
+		 	System.out.println();
+		 	// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				Set set = WDic.keySet();
+				Iterator iterator = set.iterator();  
+				String SelectedWhereCol = (String)iterator.next();
+				// Debug
+				//System.out.println("SelectedWhereCol :  " + SelectedWhereCol );
+				//System.out.println("SelectedWhereCol value :  " + TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol) );
+				//System.out.println("operator : " + WDic.get(SelectedWhereCol).get(0));
+				//System.out.println("operator : " + WDic.get(SelectedWhereCol).get(1));
+				//System.out.println("====================================" );
+				//if((String)WDic.get(SelectedWhereCol).get(0)==">") System.out.println("correctttt");
+				//else	System.out.println("why ??? ");
+				String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+				String b = WDic.get(SelectedWhereCol).get(0);
+				String c = WDic.get(SelectedWhereCol).get(1);
+				// Debug
+				//System.out.println("Debug : ");
+				//System.out.println(WDic.keySet());
+				//System.out.println(a);
+				//System.out.println(b);
+				//System.out.println(c);
+				//System.out.println(a.length() + " , " + b.length() + " , " + c.length());
+				//System.out.println(compS(a,b,c));
+				if(WN == true) { 
+				if(compN(a,b,c)) {   
+					for(String Sc: Scol) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Sc)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Sc) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+				}
+
+			 }
+		 }
+  	}
+}
+
+  public static void PrintWhereS() {
+    if( All == true ) {
+		for (String T: Tname) {
+			for (String Ac : TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+				System.out.print(Ac+ "		");
+			}
+			System.out.println();
+			// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+			Set set = WDic.keySet();
+			Iterator iterator = set.iterator();  
+			String SelectedWhereCol = (String)iterator.next();
+			String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+			String b = WDic.get(SelectedWhereCol).get(0);
+			String c = WDic.get(SelectedWhereCol).get(1);
+			if(WS == true) { 
+				if(compS(a,b,c)) {   
+					for(String Ac: TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Ac)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Ac) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+			}
+		}
+	 }
+	}
+ else {     
+	for (String T: STname) {
+		for (String Sc : Scol) {
+			System.out.print(Sc+ "		");
+		}
+		 System.out.println();
+		 // each record, I have to print selected attributes
+		for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+			Set set = WDic.keySet();
+			Iterator iterator = set.iterator();  
+			String SelectedWhereCol = (String)iterator.next();
+			// Debug
+			//System.out.println("SelectedWhereCol :  " + SelectedWhereCol );
+			//System.out.println("SelectedWhereCol value :  " + TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol) );
+			//System.out.println("operator : " + WDic.get(SelectedWhereCol).get(0));
+			//System.out.println("operator : " + WDic.get(SelectedWhereCol).get(1));
+			//System.out.println("====================================" );
+			String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+			String b = WDic.get(SelectedWhereCol).get(0);
+			String c = WDic.get(SelectedWhereCol).get(1);
+			if(WS == true) { 
+				if(compS(a,b,c)) {   
+					for(String Sc: Scol) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Sc)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Sc) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+			}
+		}
+	} 
+  }
+}
+public static void PrintWhereSN() {
+    if( All == true ) {
+		for (String T: Tname) {
+			for (String Ac : TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+				System.out.print(Ac+ "		");
+			}
+			System.out.println();
+			// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				Set set = WDic.keySet();
+				Iterator iterator = set.iterator();  
+				String SelectedWhereCol = (String)iterator.next();
+				String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+				String b = WDic.get(SelectedWhereCol).get(0);
+				String c = WDic.get(SelectedWhereCol).get(1);
+				String a2 = null;
+				String b2 = null;
+				String c2 = null;
+				if (iterator.hasNext()) {
+					String SelectedWhereCol2 = (String)iterator.next();
+					a2 = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol2);
+					b2 = WDic.get(SelectedWhereCol2).get(0);
+					c2 = WDic.get(SelectedWhereCol2).get(1);
+				}
+				if(compS(a,b,c)&&compN(a2,b2,c2)) {   
+					for (String Ac: TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Ac)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Ac) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+		 }
+	 }
+	}
+	else { 
+    
+	for (String T: STname) {
+			for (String Sc : Scol) {
+				System.out.print(Sc+ "		");
+			}
+		 	System.out.println();
+		 	// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				Set set = WDic.keySet();
+				Iterator iterator = set.iterator();  
+				String SelectedWhereCol = (String)iterator.next();
+				
+				String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+				String b = WDic.get(SelectedWhereCol).get(0);
+				String c = WDic.get(SelectedWhereCol).get(1);
+				String a2 = null;
+				String b2 = null;
+				String c2 = null;
+				if (iterator.hasNext()) {
+					String SelectedWhereCol2 = (String)iterator.next();
+					a2 = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol2);
+					b2 = WDic.get(SelectedWhereCol2).get(0);
+					c2 = WDic.get(SelectedWhereCol2).get(1);
+				}
+				if(compS(a,b,c)&&compN(a2,b2,c2)) {  
+					for(String Sc: Scol) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Sc)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Sc) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+
+			 }
+		 }
+  	}
+}
+
+public static boolean compDoubleAnd(String op11, String cp1, String op12, String op21, String cp2, String op22) {
+		if(WN == true) {
+			return (compN(op11, cp1, op12)&&(compN(op21, cp2, op22)));
+		}
+		else if (WS == true) {
+			return (compS(op11, cp1, op12)&&(compS(op21, cp2, op22)));
+		}
+		else return false;
+	}
+public static void PrintWhereDoubleAnd() {
+    if( All == true ) {
+		for (String T: Tname) {
+			for (String Ac : TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+				System.out.print(Ac+ "		");
+			}
+			System.out.println();
+			// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				Set set = WDic.keySet();
+				Iterator iterator = set.iterator();  
+				String SelectedWhereCol = (String)iterator.next();
+				String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+				String b = WDic.get(SelectedWhereCol).get(0);
+				String c = WDic.get(SelectedWhereCol).get(1);
+				String a2 = new String();
+				String b2 = new String();
+				String c2 = new String();
+				if (iterator.hasNext()) {
+					String SelectedWhereCol2 = (String)iterator.next();
+					a2 = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol2);
+					b2 = WDic.get(SelectedWhereCol2).get(0);
+					c2 = WDic.get(SelectedWhereCol2).get(1);
+				}
+				if(compDoubleAnd(a,b,c,a2,b2,c2)) {   
+					for (String Ac: TablesMap.get(T).Recs.get(0).Attr_ValPairs.keySet()) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Ac)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Ac) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+		 }
+	 }
+	}
+	else { 
+    
+	for (String T: STname) {
+			for (String Sc : Scol) {
+				System.out.print(Sc+ "		");
+			}
+		 	System.out.println();
+		 	// each record, I have to print selected attributes
+			for(int i=0; i<TablesMap.get(T).CatalogInfo.records_size; i++) {
+				Set set = WDic.keySet();
+				Iterator iterator = set.iterator();  
+				String SelectedWhereCol = (String)iterator.next();
+				
+				String a = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol);
+				String b = WDic.get(SelectedWhereCol).get(0);
+				String c = WDic.get(SelectedWhereCol).get(1);
+				String a2 = new String();
+				String b2 = new String();
+				String c2 = new String();
+				if (iterator.hasNext()) {
+					String SelectedWhereCol2 = (String)iterator.next();
+					a2 = TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(SelectedWhereCol2);
+					b2 = WDic.get(SelectedWhereCol2).get(0);
+					c2 = WDic.get(SelectedWhereCol2).get(1);
+				}
+				if(compDoubleAnd(a,b,c,a2,b2,c2)) {  
+					for(String Sc: Scol) {
+						if (TablesMap.get(T).CatalogInfo.Attrs.contains(Sc)) { 
+							System.out.print(TablesMap.get(T).Recs.get(i).Attr_ValPairs.get(Sc) + "		");
+					 	}
+						else {
+				  		System.out.print("NULL" +"		");
+						}
+				 	}
+				 System.out.println();
+				}
+
+			 }
+		 }
+  	}
+}
+
+// ============================================================================================================================================================
+// *******************************************  Sort Data  *****************************************************
+// ============================================================================================================================================================
+// ----------------------------------------------------------path 0 -----------------------------------------------------------
+	public static void showRec(String T) {
+		//for One table, it is possible 
+		System.out.println("<><><><> show Rec <><><>><><><><> !!!");
+		Iterator <Records> iti= TablesMap.get(T).Recs.iterator();
+		while(iti.hasNext()) {
+			Records r = (Records)iti.next();
+			Iterator <String > itj = TablesMap.get(T).CatalogInfo.Attrs.iterator();
+			while(itj.hasNext()) {
+				String attribute = (String)itj.next();
+				System.out.print(r.Attr_ValPairs.get(attribute) + " ");
+			}
+			System.out.println();
+		}
+	}
+	
+	public static void SortData(String T, int passN, int runN, int RecordPerPage) {
+		System.out.println(">>>>>>>>>>>> Sort "+ T +"_"+ passN + "_"+ runN +" !!!");
+		// Sort at pass 0
+		// Given Info
+		// static String ODC : the criteria of ordering
+		for(int i= RecordPerPage*runN; i< RecordPerPage*(runN+1)-1; i++){
+			int min = i; 
+			for(int j = i+1; j< RecordPerPage*(runN+1); j++){
+			if(!TablesMap.get(T).CatalogInfo.Attr_TypePairs.get(ODC).equals("string")) { 
+			  	Double op1 = Double.parseDouble(TablesMap.get(T).Recs.get(j).Attr_ValPairs.get(ODC));
+			  	Double op2 = Double.parseDouble(TablesMap.get(T).Recs.get(min).Attr_ValPairs.get(ODC));
+				if(op1 < op2) {
+					min = j;
+				}
+			}
+			else {
+				//System.out.println("Debug for string comparing !" );
+				swyootask.SortSf = true;
+			  	String op1 = TablesMap.get(T).Recs.get(j).Attr_ValPairs.get(ODC);
+			  	String op2 = TablesMap.get(T).Recs.get(min).Attr_ValPairs.get(ODC);
+				if(op1.compareTo(op2) < 0) {
+					min = j;
+				}  
+			}
+			}
+			Collections.swap(TablesMap.get(T).Recs,min,i);
+		}	
+	}
+	public static void WriteRunsPassZero(String T, int runN, int RecordPerPage) throws IOException{
+		// using one buffer "oo", make runs where each run is sorted 
+		System.out.println(">>>>>>>>>>>> "+ T +"_0_"+ runN +".txt Write !!!");
+		swyootask.path_write = swyootask.subpath_write.concat(T).concat("_0_" + runN + ".txt");
+		ObjectOutputStream oo = null;
+        try {
+        	oo = new ObjectOutputStream(new FileOutputStream(swyootask.path_write));
+        	swyootask.SortData(T, 0, runN, RecordPerPage);
+        	//Write a page  (iteration for # recordPerPage)
+        	for (int i=0; i< RecordPerPage; i++) { 
+        		oo.writeObject(TablesMap.get(T).Recs.get(RecordPerPage*runN + i));
+        	} 	
+        }
+		finally {
+			if(oo !=null) {
+			  	oo.close();
+			}
+		}
+	}
+	public static void Write_InitialPass(String T, int RecordPerPage) throws IOException{
+		System.out.println("=========================== Pass0 Write ========================");
+		// Objective: Write a page
+		// [info ]
+		// TablesMap.get(T).CatalogInfo.records_size
+		// suppose that each page has RcoredPerPage = 2 records
+		// records_size/RecordPerPage : # of runs(at pass 0, each run size is same with a page) are generated  
+		for(int i=0; i < TablesMap.get(T).CatalogInfo.records_size/RecordPerPage; i++) {
+			swyootask.WriteRunsPassZero(T,i,RecordPerPage);
+		}
+	}
+	// -------------------------------------------------- pass i ~ end -------------------------------------------------------- 
+	public static void SortRuns(String T, int B, int passN, int runN, int RecordPerPage) throws IOException{
+	 	// recall ...
+	 	// passN = 0 .. (int)Math.ceil(Math.log(PassZeroRuns)/Math.log(B-1)) 
+	 	// runN = 0 ... (int)Math.ceil((double)PreviousTotalRuns/(B-1))
+		// each run ...
+		FileInputStream bif[] = new FileInputStream[B-1];
+		ObjectInputStream bi[] = new ObjectInputStream[B-1];
+		for(int i= 0;i<B-2;i++) {
+			bi[i] = null;
+			bif[i] = null;
+		}
+		ObjectOutputStream bo = null;
+
+		// make runs
+		try {
+		  	String Outputbuffer_path = swyootask.subpath_write.concat(T).concat("_"+passN+"_" + runN + ".txt");
+			bo = new ObjectOutputStream(new FileOutputStream(Outputbuffer_path));
+			//System.out.println("output buffer connected! and write a obj ");
+			
+		  	Records r = null;
+		  	Table tt = new Table();
+		  	// load all data from previous run to RAM. after that, I will sort data and write down a run
+		  	int recordN = 0;
+			for(int i= 0;i<B-1;i++) { 
+			  	String Inputbuffer_path = swyootask.subpath_write.concat(T).concat("_"+(passN-1)+"_" + (runN*(B-1)+i) + ".txt");
+			  	// existence of a file checking 
+				if((new File(Inputbuffer_path).exists())) {
+					bif[i] = new FileInputStream(Inputbuffer_path);
+					if(bif[i].available() > 0) {  
+						bi[i] = new ObjectInputStream(bif[i]);
+						System.out.println(" <<<<<<<<<<<<<<< "+T+"_"+(passN-1)+ "_"+(runN*(B-1)+i)+".txt Read !!! ");
+					}
+					for(int j=0; j< RecordPerPage*Math.pow((B-1),(passN-1)) ; j++) {
+				  		// Disk to RAM load # RecordPerPage*(B-1) records, that is, load # (B-1) pages
+						if( bif[i].available() > 0) {
+							r = (Records)bi[i].readObject();
+							recordN++;
+							tt.Recs.add(r);
+							System.out.println("read obj from previous runN = "+ (runN*(B-1)+i) +" : "+ r.Attr_ValPairs.get(ODC));
+						}
+					}
+				}
+			}
+			
+			// Sort start!
+			// Show, before sorting, run info
+			System.out.println("-------------we will sort this data and make run and write it---------" );
+			
+			Iterator <Records> iti= tt.Recs.iterator();
+			while(iti.hasNext()) {
+				Records k = (Records)iti.next();
+				Iterator <String > itj = TablesMap.get(T).CatalogInfo.Attrs.iterator();
+			while(itj.hasNext()) {
+				String attribute = (String)itj.next();
+				System.out.print(k.Attr_ValPairs.get(attribute) + " ");
+			}
+			System.out.println();
+			}
+			
+			System.out.println(">>>>>>>>>>>> Sort "+ T +"_"+ passN + "_"+ runN +" !!!");
+			//----------------------------------Sort------------------------------------------------
+			// Given Info
+			// static String ODC : the criteria of ordering (sort temporate table tt)
+			for(int i= 0; i< recordN-1; i++){
+				int min = i;
+				for(int j = i+1; j< recordN; j++){
+				if(!swyootask.SortSf) {
+			  		Double op1 = Double.parseDouble(tt.Recs.get(j).Attr_ValPairs.get(ODC));
+			  		Double op2 = Double.parseDouble(tt.Recs.get(min).Attr_ValPairs.get(ODC));
+					if(op1 < op2) {
+						min =j;
+					}
+				}
+				else {
+					String op1 = tt.Recs.get(j).Attr_ValPairs.get(ODC);
+			  		String op2 = tt.Recs.get(min).Attr_ValPairs.get(ODC);
+			  		if(op1.compareTo(op2) < 0) {
+						min = j;
+					}
+				}
+				}
+				Collections.swap(tt.Recs,min,i);
+			}
+
+			System.out.println("-------------------after sorting--------------");
+			
+			Iterator <Records> itip= tt.Recs.iterator();
+			while(itip.hasNext()) {
+				Records kp = (Records)itip.next();
+				Iterator <String > itjp = TablesMap.get(T).CatalogInfo.Attrs.iterator();
+			while(itjp.hasNext()) {
+				String attribute = (String)itjp.next();
+				System.out.print(kp.Attr_ValPairs.get(attribute) + " ");
+			}
+			System.out.println();
+			}
+			
+			//--------------------------------- write sorted run -------------------------------------------
+			System.out.println(">>>>>>>>>>>> "+ T +"_"+(passN)+"_"+runN+".txt Write !!!");
+			Iterator <Records> outit= tt.Recs.iterator();
+			while(outit.hasNext()) {
+				Records kp = (Records)outit.next();
+				//System.out.println("insert record with key : " + kp.Attr_ValPairs.get(ODC));
+				bo.writeObject(kp);
+			}
+			
+		}
+		catch(ClassNotFoundException e) {
+        	e.printStackTrace();
+		}
+		finally {
+			for(int i= 0;i<B-1;i++) { 
+			if(bi[i] !=null) {
+				bi[i].close();
+				}
+			}
+			if(bo !=null) {
+			  	bo.close();
+			}
+		}
+			
+	}
+	public static void SortPasses(String T,int B, int passN, int RecordPerPage) throws IOException{
+		System.out.println("=============== path "+ passN + " start! =======================");
+	  	// each pass ... 
+		int TotalPages = TablesMap.get(Tname.get(0)).CatalogInfo.records_size / RecordPerPage; // it means N
+		int PreviousTotalRuns = (int)Math.ceil((double)TotalPages / (double)Math.pow((B-1),(passN-1)));
+		System.out.println( "previous total runs : "+ PreviousTotalRuns);
+		System.out.println( "I will make # of runs : "+ (int)Math.ceil((double)PreviousTotalRuns/(B-1)));
+		for(int runN = 0; runN < (int)Math.ceil((double)PreviousTotalRuns/(B-1)) ; runN++) {
+		  	// T_passN_runN.txt write function 
+			swyootask.SortRuns(Tname.get(0),B,passN,runN,RecordPerPage);
+		}
+	}
+	public static void CheckSort(int B, int RecordPerPage) throws IOException{
+		System.out.println("____________________________CheckSort_________________________________");
+		swyootask.path_write = swyootask.subpath_write.concat("Sort_file").concat(".txt");
+		
+		// ======================================= pass0 ============================================
+		// Constraint : 1. file.txt must have even records, otherwise Error happen!
+		// 				2. Only one table can be operated  
+		// each page has 2 records, that is, RecordsPerPage = 2, B = 1 
+		//swyootask.showRec(Tname.get(0));			//Debug before pass0 
+		swyootask.Write_InitialPass(Tname.get(0), RecordPerPage);
+		//swyootask.showRec(Tname.get(0));
+	
+		//=================== external sort start: pass1RecordPerPage ~ final pass =================================== 
+        // I will make oi1 ~ oi3 to read data and write data for oo, that is B = 4
+		int TotalPages = TablesMap.get(Tname.get(0)).CatalogInfo.records_size / RecordPerPage; // it means N
+		int PassZeroRuns = TotalPages/1;   // I implemented B = 1 at pass 0, and I will use B = 4 after pass1 ~  
+		// except for pass 0, that is, real TotalPasses = TotoalPasses +1(at pass 0)
+		int TotalPasses = (int)Math.ceil(Math.log(PassZeroRuns)/Math.log(B-1)); 
+		System.out.println("TotalPages (N) : "+ TotalPages);
+		System.out.println("TotalPasses : " + TotalPasses);
+		for(int passN = 1; passN < TotalPasses + 1 ; passN++) {
+			// [issue]
+			// How many each buffer(b1,b2,b3) have to read # runs at passN?
+			// How many each buffer(b1,b2,b3) have to read # record at each runN at each passN?
+			swyootask.SortPasses(Tname.get(0), 4, passN, RecordPerPage);
+			//swyootask.WritePasses(Tname.get(0), 4, passN, RecordPerPage);
+		}
+		swyootask.sortedfilepath = swyootask.subpath_write.concat(Tname.get(0)).concat("_"+TotalPasses+"_0.txt");
+		System.out.println("____________________________CheckSort End______________________________");
+	}
+
+	public static void UpdateInfo() throws IOException{
+		System.out.println("UpdateInfo !!! ");
+		FileInputStream fi = null;
+		ObjectInputStream oi = null;
+		int i = 0;
+		try {
+			fi = new FileInputStream(swyootask.sortedfilepath);
+        	oi = new ObjectInputStream(fi);
+        	while(true) { 
+        		Records r = null;
+        		if(!(fi.available() > 0)) break;
+        		r = (Records)oi.readObject();
+        		TablesMap.get(Tname.get(0)).Recs.set(i,r);
+        		//System.out.println(r);
+        		i++;
+        	}
+		}
+		catch(ClassNotFoundException e) {
+        	e.printStackTrace();
+		}
+		finally {
+			if(oi !=null) {
+				oi.close();
+			}
+			if(fi != null) {
+        		fi.close();
+        	}
+		}
+		  
+	}
+
+// ============================================================================================================================================================
+// *******************************************  Main parser loop  *****************************************************
+// ============================================================================================================================================================
+  public static void main(String args []) throws ParseException
+  {
+    swyootask parser = new swyootask(System.in);
+    
+    while (true)
+    {
+      System.out.println("Reading from standard input...");
+      //swyootask.STname.add("*");
+      //swyootask.Tname.add("*");
+
+      try
+      {
+        switch (swyootask.one_line())
+        {
+          case 0 :
+			// Debug test
+			System.out.println("Tname : "+  Tname);
+			//System.out.println("size of Tname : "+  Tname.size());
+			System.out.println("Selected col : "+  Scol);
+			System.out.println("Where col : "+  Wcol);
+			//System.out.println("Operator : "+  Op);
+			//System.out.println("Comp Num : "+  ConN);
+			//System.out.println("Comp String : "+  ConS);
+			
+			// Debug additional info
+			//System.out.println("All flag : "+  All);
+			//System.out.println("Wf flag : "+  wf);
+			System.out.println("WN flag : "+  WN);
+			System.out.println("WS flag : "+  WS);
+			System.out.println("WAND flag : "+  WAND);
+			//System.out.println("stack : "+  st);
+			System.out.println("Wdic : "+  WDic.keySet());
+			Set set = WDic.keySet();
+			Iterator iterator = set.iterator();
+			while(iterator.hasNext()) {
+				String key = (String)iterator.next();
+				System.out.println("hashMap values of [[ "+ key +" ]" + "\u2192" + WDic.get(key)+" ]");
+			}
+			System.out.println("ODC : "+  ODC );
+			
+
+			// ============================================= read file =========================================
+			for (String T: Tname) {
+			  ReadFile(T);
+			}
+
+			// [Constraint]
+			// 1. it can sort only one table
+			int Bsize = 4;
+			int RecordPerPage = 2;
+			if(!ODC.equals("NIL")) {
+			  CheckSort(Bsize, RecordPerPage);
+			  UpdateInfo(); 
+			}
+
+			System.out.println(" ========================================= print =========================================== " );
+			// [Constraint]
+			// 1. it can print only one table (join is not defined yet)
+			// 2. it can print at most two where clause
+			if (WDic.isEmpty()) {
+				Print();
+			}
+			else if((WN == true) && (WS == false)&& (WAND == false)&& (Tname.size()< 2)) {
+				PrintWhereN();
+			}
+			else if((WS == true) && (WN == false)&& (WAND == false)&& (Tname.size()< 2)) {
+				PrintWhereS();
+			}
+			else if((WS == true) && (WN == true)&& (WAND == true)&& (Tname.size()< 2)) {
+				PrintWhereSN();
+			}
+			else if(((WS == true) && (WN == false)&& (WAND == true))||((WS == false) && (WN == true)&& (WAND == true))&& (Tname.size()< 2)) {
+				PrintWhereDoubleAnd();
+			}
+			
+          System.out.println(" =========================================print end ======================================= " ); 
+          System.out.println("OK.");
+          // Deallocate global list 
+          swyootask.STname.clear();
+          swyootask.Tname.clear();
+          swyootask.WTname.clear();
+          swyootask.Scol.clear();
+          swyootask.Wcol.clear();
+          swyootask.Op.clear();
+          swyootask.ConN.clear();
+          swyootask.ConS.clear();
+          swyootask.WDic.clear();
+		   // Deallocate schema info
+		   swyootask.All = false;
+		   swyootask.WN = false;
+		   swyootask.WS = false;
+		   swyootask.WAND = false;
+		   swyootask.SortSf = false;
+		   swyootask.TablesMap.clear();
+
+		   
+          break;
+          case 1 : 
+          System.out.println("Goodbye.");
+          System.exit(0);
+          break;
+          default :
+          System.out.println("E: unexpected input! ");
+          break;
+        }
+      }
+      catch (Exception e)
+      {
+        System.out.println("NOK.");
+        System.out.println(e.getMessage());
+        swyootask.ReInit(System.in);
+      }
+      catch (Error e)
+      {
+        System.out.println("Oops.");
+        System.out.println(e.getMessage());
+        break;
+      }
+    }
+  }
+}
+
+PARSER_END(swyootask)
+
+SKIP :
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+}
+
+TOKEN [IGNORE_CASE]: /* OPERATORS */
+{
+  < PLUS : "+" >
+| < MINUS : "-" >
+| < DIVIDE : "/" >
+| < SELECT : "select" < SPACE > >
+| < FROM : "from" < SPACE > >
+| < WHERE : "where" < SPACE > >
+| < AND : < SPACE > "and" < SPACE > >
+| < OR : < SPACE > "or" < SPACE > >
+| < ORDERBY : "order by" < SPACE > >
+| < #SPACE : ([" ","\t","\r","\n"])+ >
+}
+
+TOKEN :
+{
+  < CONSTANT : < DIGIT > (< DIGIT >)* >
+| < #DIGIT : [ "0"-"9" ] >
+| < ALL :  "*" >
+| < COMMA : "," >
+| < DOT  : "." >
+| < APOSTROPHE : "'" >
+| < COMP : < SPACE > ">" | "=" | "<" | "==" < SPACE > >
+| < WORD : < CHAR > (< CHAR >)*>
+| < CHAR : [ "a"-"z", "A"-"Z" ] >
+}
+
+int one_line() :
+{}
+{
+  
+  query() ";"
+  {
+	return 0;
+  }
+  | ";"
+  {
+    return 1;
+  }
+}
+
+// sum query definition
+void query() :
+{
+}
+{
+  select_query() { }
+}
+
+void select_query(): {}{ < SELECT > select_list() table_expr() ( additional_expr() )? }
+void select_list(): {Token all = null ;}
+{
+   all = < ALL >
+   { 
+     if ( all.toString().equals("*") ) {
+	  		swyootask.All = true;
+	  	}
+   }
+   | selected_col() (< COMMA > selected_col())*
+   
+}
+void selected_col(): { Token t; Token c = null;}
+{
+   t = < WORD > (< DOT > c = < WORD >)?
+	{
+	  	if ( !swyootask.STname.contains(t.toString()) ) {
+	  		swyootask.STname.add(t.toString());
+	  	}
+	  	if ( !swyootask.Scol.contains(c.toString()) ) {
+	  		swyootask.Scol.add(c.toString());
+	  	}
+  	}
+}
+void table_expr(): { } {from_clause() (where_clause())? }
+void from_clause(): { }
+{
+< FROM > table_list()
+	{	
+		for (int i=0 ; i< swyootask.STname.size(); i++) {
+       	if ( swyootask.Tname.contains(swyootask.STname.get(i)) ) {
+  				 //System.out.println("select table is accorded with Tname at from");
+  			}
+  			else {
+  				System.out.println("E: STname set is not a subset of Tname ");
+  				System.exit(0);
+  			}	
+		}
+	}
+}
+void table_list():{ }{ table() ( < COMMA > table() )* } 
+void table(): { Token t; }
+{
+   t = < WORD>
+   {
+     if ( !swyootask.Tname.contains(t.toString()) ) {
+	  		swyootask.Tname.add(t.toString());
+	  	}
+	}
+}
+void where_clause(): { } { < WHERE> bool_expr() ( ( < AND > { WAND = true; }| < OR> ) bool_expr() )? where_listcheck() }
+void where_listcheck(): { }
+{
+	{
+  		//System.out.println("Tname: " + swyootask.Tname);
+     	//System.out.println("WTname: " + swyootask.WTname);
+     	for (int i=0 ; i< swyootask.WTname.size(); i++) {
+       	if ( swyootask.Tname.contains(swyootask.WTname.get(i)) ) {
+  			}
+  			else {
+  				System.out.println("E: WTname set is not a subset of Tname ");
+  				System.exit(0);
+  			}	
+		}
+	}
+}
+void bool_expr(): { } { bool_test() }
+void bool_test(): { } {operand_attribute() comp_op() ( operand_number() | operand_attribute() | operand_string() ) { wf = true;} }
+void operand_attribute(): { Token t; Token c = null;}
+{
+	t = < WORD > (< DOT > c = < WORD >)
+	{
+		if ( !swyootask.WTname.contains(t.toString()) ) {
+	  		swyootask.WTname.add(t.toString());
+	  	}
+	  	if(wf == true){ 
+	  		st.push(c.toString());
+	  		swyootask.WDic.put(c.toString(), new ArrayList< String>());
+	  		wf = false;
+	  	}else {
+	  		swyootask.WDic.get(st.pop()).add(c.toString());
+	  		wf = true;
+	  	}
+	  		  	
+	  	if ( !swyootask.Wcol.contains(c.toString()) ) {
+	  		swyootask.Wcol.add(c.toString());
+	  	}
+	}
+}
+void comp_op(): { Token o = null;} { o = < COMP > {swyootask.Op.add(o.toString()); swyootask.WDic.get(st.peek()).add(o.toString().trim()); } }
+void operand_number(): { Token n = null;} { n = < CONSTANT > {swyootask.ConN.add(n.toString()); swyootask.WDic.get(st.pop()).add(n.toString());  WN = true;} }
+void operand_string(): { Token s = null;} { s = < APOSTROPHE > s = < WORD> < APOSTROPHE > {swyootask.ConS.add(s.toString()); swyootask.WDic.get(st.pop()).add(s.toString()); WS =true;} } 
+void additional_expr(): { } { sort_expr() }
+void sort_expr(): { Token t = null; } { < ORDERBY > < WORD > < DOT > t = < WORD > { swyootask.ODC = t.toString(); } }

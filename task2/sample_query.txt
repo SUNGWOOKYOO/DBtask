@@ -1,0 +1,73 @@
+SELECT * FROM S;
+SELECT * FROM S; SELECT * FROM R;
+SELECT S.sid FROM S;
+SELECT S.sid, S.sname FROM S;
+SELECT S.sid, S.sname FROM S WHERE S.sid = 22;
+SELECT S.sid, S.sname FROM S WHERE S.age > 18;
+SELECT S.sid, S.sname FROM S WHERE S.sname == 'Bob';
+SELECT S.sid, S.sname FROM S, R WHERE S.sid = R.sid;
+SELECT S.sid, S.sname FROM S, R WHERE S.sid = R.sid AND S.age > 18;
+
+
+select * from S where S.sname == 'Horatio' and S.rating > 8;
+select * from S where S.sname == 'Horatio' and S.rating > 3;
+select S.age, S.rating from S where S.sname == 'Horatio' and S.rating > 8;
+select * from S where S.rating > 8 and S.sname == 'Horatio';
+select S.age, S.rating from S where S.rating < 5 and S.age < 40;
+select * from S where S.rating > 4 and S.age > 34;
+ ========================================= print =========================================== 
+>> expected result :
+-------------------------------------------------------------------------------------------
+age		rating		
+25.5		3		
+ =========================================print end ======================================= 
+
+
+select * from S where S.rating < 5 order by S.age;
+ ========================================= print =========================================== 
+>> expected result :
+-------------------------------------------------------------------------------------------
+sname		rating		age		sid		
+Art		3		25.5		85		
+Brutus		1		33.0		29		
+Bob		3		63.5		95		
+ =========================================print end ======================================= 
+
+select * from S where S.rating > 4 and S.age > 34;
+ ========================================= print =========================================== 
+>> expected result :
+-------------------------------------------------------------------------------------------
+sname		rating		age		sid		
+Dustin		7		45.0		22		
+Lubber		8		55.5		31		
+Rusty		10		35.0		58		
+Horatio		7		35.0		64		
+Horatio		9		35.0		74		
+ =========================================print end ======================================= 
+
+select S.sid, S.rating, S.age from S where S.rating > 4 and S.age > 34 order by S.rating;
+select * from S where S.rating > 4 and S.age > 34 order by S.rating;
+ ========================================= print ===========================================
+>> expected result :
+------------------------------------------------------------------------------------------- 
+sname		rating		age		sid		
+Dustin		7		45.0		22		
+Horatio		7		35.0		64		
+Lubber		8		55.5		31		
+Horatio		9		35.0		74		
+Rusty		10		35.0		58		
+ =========================================print end ======================================= 
+
+
+
+
+select * from S where S.rating < 5 order by S.age;
+select * from S where S.rating > 4 and S.age > 34;
+select S.sid, S.rating, S.age from S where S.rating > 4 and S.age > 34 order by S.rating;
+select * from S where S.rating > 4 and S.age > 34 order by S.rating;
+
+select * from S order by S.sname;
+
+
+
+
